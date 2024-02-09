@@ -1,0 +1,93 @@
+
+service: my-api-serverless-ts
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action: 
+        - dynamodb:*
+      Resource: 
+        - ${self:custom.taskTableArn}
+
+
+  
+
+plugins:
+  - serverless-openapi-documentation
+  - serverless-offline
+  - serverless-esbuild
+
+
+custom:
+  esbuild:
+    bundle: true
+    minify: true
+  taskTableArn: arn:aws:dynamodb:us-east-1:649074286581:table/TaskTable
+  documentation:
+    version: 1.0.0
+    title: Api-Serverless-NodeJs
+    endpoints:
+      - path: /api/tasks/{id}
+        method: get
+        functionName: serviceGetTask
+        description: Endpoint para obtener una task por su ID
+
+
+
+
+functions:
+  servicioGETALL:
+    handler: src/handlers/handlerGETSWAPI.servicioALLGETSWAPI
+    events: 
+      - httpApi:
+          path: /api/serviciogetswpi
+          method: get
+  
+  serviceGET:
+     handler: src/handlers/handlerGETSWAPI.servicioGETSWAPI
+     events:
+       - httpApi:
+          path: /api/serviciogetswpi/{codigo}
+          method: get
+  
+
+  servicePostTask:
+     handler: src/handlers/handlerTask.servicePostTask
+     events:
+       - httpApi:
+          path: /api/tasks
+          method: post
+  serviceGetAllTask:
+     handler: src/handlers/handlerTask.serviceGetAllTasks
+     events:
+       - httpApi:
+          path: /api/tasks
+          method: get
+  serviceGetTask:
+     handler: src/handlers/handlerTask.serviceGetTask
+     events:
+       - httpApi:
+          path: /api/tasks/{id}
+          method: get
+          
+ 
+
+
+resources:
+  Resources:
+    TaskTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: TaskTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
